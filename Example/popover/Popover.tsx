@@ -23,7 +23,7 @@ import { Rect, Point, Size, getRectForRef, getArrowSize, getBorderRadius } from 
 import { MULTIPLE_POPOVER_WARNING, Placement, Mode, DEFAULT_BORDER_RADIUS, FIX_SHIFT as ORIGINAL_FIX_SHIFT } from './Constants';
 import { computeGeometry, Geometry } from './Geometry';
 
-const noop = () => { };
+const noop = () => {};
 
 const isIOS = Platform.OS === 'ios';
 const isWeb = Platform.OS === 'web';
@@ -60,7 +60,6 @@ interface PopoverProps {
 interface PublicPopoverProps extends PopoverProps {
   mode?: Mode;
   displayArea?: Rect;
-  extraView: ReactNode;
   from?: Rect | RefObject<View> | ((sourceRef: RefObject<View>, openPopover: () => void) => ReactNode) | ReactNode;
 }
 
@@ -101,7 +100,7 @@ export default class Popover extends Component<PublicPopoverProps, PublicPopover
     onRequestClose: PropTypes.func,
     onCloseStart: PropTypes.func,
     onCloseComplete: PropTypes.func,
-    extraView: PropTypes.node,
+
     debug: PropTypes.bool,
   }
 
@@ -123,7 +122,7 @@ export default class Popover extends Component<PublicPopoverProps, PublicPopover
   private sourceRef: RefObject<View> = React.createRef();
 
   render() {
-    const { mode, from, isVisible, onRequestClose, extraView, ...otherProps } = this.props;
+    const { mode, from, isVisible, onRequestClose, ...otherProps } = this.props;
 
     const actualIsVisible = isVisible === undefined ? this.state.isVisible : isVisible;
 
@@ -137,7 +136,7 @@ export default class Popover extends Component<PublicPopoverProps, PublicPopover
       } else if (from.hasOwnProperty('current')) {
         fromRef = from as RefObject<View>;
       } else if (typeof from === 'function') {
-        const element = from(this.sourceRef, () => this.setState({ isVisible: true }));
+        const element = from(this.sourceRef, () => this.setState({ isVisible: true })); 
         if (React.isValidElement(element)) {
           sourceElement = element;
           fromRef = this.sourceRef;
@@ -159,7 +158,6 @@ export default class Popover extends Component<PublicPopoverProps, PublicPopover
       ...otherProps,
       fromRect,
       fromRef,
-      extraView,
       isVisible: actualIsVisible,
       onRequestClose: () => {
         onRequestClose && onRequestClose();
@@ -194,7 +192,6 @@ interface RNModalPopoverProps extends PopoverProps {
   fromRect?: Rect;
   fromRef?: RefObject<View>;
   displayArea?: Rect;
-  extraView: ReactNode;
 }
 
 class RNModalPopover extends Component<RNModalPopoverProps, ModalPopoverState> {
@@ -218,7 +215,7 @@ class RNModalPopover extends Component<RNModalPopoverProps, ModalPopoverState> {
   }
 
   render() {
-    const { statusBarTranslucent, extraView, onOpenStart, onCloseStart, onCloseComplete, onRequestClose, ...otherProps } = this.props;
+    const { statusBarTranslucent, onOpenStart, onCloseStart, onCloseComplete, onRequestClose, ...otherProps } = this.props;
     const { visible } = this.state;
 
     return (
@@ -249,7 +246,6 @@ class RNModalPopover extends Component<RNModalPopoverProps, ModalPopoverState> {
             RNModalPopover.isShowingInModal = false;
           }}
           onOpenStart={onOpenStart}
-          extraView={extraView}
           getDisplayAreaOffset={async () => new Point(0, 0)}
           {...otherProps}
         />
@@ -285,7 +281,7 @@ class JSModalPopover extends Component<JSModalPopoverProps, ModalPopoverState> {
 
     if (visible) {
       return (
-        <View pointerEvents="box-none" style={[styles.container, { left: 0 }]} ref={this.containerRef}>
+        <View pointerEvents="box-none" style={[styles.container, {left: 0}]} ref={this.containerRef}>
           <AdaptivePopover
             onCloseComplete={() => {
               onCloseComplete && onCloseComplete();
@@ -317,7 +313,6 @@ interface AdaptivePopoverProps extends PopoverProps {
   fromRef?: RefObject<View>;
   showBackground?: boolean;
   displayArea?: Rect;
-  extraView?: ReactNode;
   getDisplayAreaOffset: () => Promise<Point>;
 }
 
@@ -445,14 +440,12 @@ class AdaptivePopover extends Component<AdaptivePopoverProps, AdaptivePopoverSta
     const absoluteVerticalCutoff = Dimensions.get('window').height - keyboardHeight - (isIOS ? 10 : 40);
     const combinedY = Math.min(displayArea.height + displayArea.y, absoluteVerticalCutoff);
 
-    this.setState({
-      shiftedDisplayArea: {
-        x: displayArea.x,
-        y: displayArea.y,
-        width: displayArea.width,
-        height: combinedY - displayArea.y
-      }
-    });
+    this.setState({ shiftedDisplayArea: {
+      x: displayArea.x,
+      y: displayArea.y,
+      width: displayArea.width,
+      height: combinedY - displayArea.y
+    }});
   }
 
   async calculateRectFromRef() {
@@ -484,7 +477,7 @@ class AdaptivePopover extends Component<AdaptivePopoverProps, AdaptivePopoverSta
   }
 
   render() {
-    const { onOpenStart, onCloseStart, fromRef, extraView, ...otherProps } = this.props;
+    const { onOpenStart, onCloseStart, fromRef, ...otherProps } = this.props;
     const { fromRect } = this.state;
 
     // Don't render popover until we have an initial fromRect calculated for the view
@@ -510,20 +503,19 @@ class AdaptivePopover extends Component<AdaptivePopoverProps, AdaptivePopoverSta
           if (this._isMounted) this.setState({ shiftedDisplayArea: null });
         }}
         skipMeasureContent={() => this.waitForResizeToFinish}
-        extraView={extraView}
         safeAreaViewContents={(
           <TouchableWithoutFeedback
-            style={{ flex: 1 }}
+            style={{flex: 1}}
             onLayout={evt => this.setDefaultDisplayArea(
               new Rect(
                 evt.nativeEvent.layout.x + 10,
                 evt.nativeEvent.layout.y + 10,
                 evt.nativeEvent.layout.width - 20,
                 evt.nativeEvent.layout.height - 20)
-            )
+              )
             }
           >
-            <View style={{ flex: 1 }} />
+            <View style={{flex: 1}} />
           </TouchableWithoutFeedback>
         )}
       />
@@ -538,7 +530,6 @@ interface BasePopoverProps extends PopoverProps {
   fromRect: Rect | null;
   safeAreaViewContents: ReactNode;
   skipMeasureContent: () => boolean;
-  extraView: ReactNode;
 }
 
 interface BasePopoverState {
@@ -713,7 +704,7 @@ class BasePopover extends Component<BasePopoverProps, BasePopoverState> {
     }, 100);
   }
 
-  getPolarity() {
+  getPolarity () {
     return I18nManager.isRTL ? -1 : 1;
   }
 
@@ -736,7 +727,7 @@ class BasePopover extends Component<BasePopoverProps, BasePopoverState> {
   getArrowDynamicStyle() {
     const { placement } = this.getGeom();
     const { arrowStyle, popoverStyle } = this.props;
-    const { width, height } = this.getCalculatedArrowDims();
+    const {  width, height } = this.getCalculatedArrowDims();
 
     const backgroundColor = StyleSheet.flatten(arrowStyle).backgroundColor || StyleSheet.flatten(popoverStyle).backgroundColor || styles.popoverContent.backgroundColor;
     let colors = {};
@@ -774,7 +765,7 @@ class BasePopover extends Component<BasePopoverProps, BasePopoverState> {
   getCalculatedArrowDims(): Size {
     const { placement } = this.getGeom();
     const arrowSize = getArrowSize(placement, this.props.arrowStyle);
-    switch (placement) {
+    switch(placement) {
       case Placement.LEFT:
       case Placement.RIGHT:
         arrowSize.height += 2
@@ -823,12 +814,12 @@ class BasePopover extends Component<BasePopoverProps, BasePopoverState> {
           arrowX = translatePoint.x + viewWidth - arrowWidth - borderRadius
       }
     }
-    return new Point(arrowX, (FIX_SHIFT * 2) /* Temp fix for useNativeDriver issue */ + arrowY);
+    return new Point(arrowX, (FIX_SHIFT*2) /* Temp fix for useNativeDriver issue */ + arrowY);
   }
 
   getTranslateOrigin() {
     const { requestedContentSize }: Partial<BasePopoverState> = this.state;
-    const { forcedContentSize, viewLargerThanDisplayArea, popoverOrigin, anchorPoint } = this.getGeom();
+    const { forcedContentSize, viewLargerThanDisplayArea, popoverOrigin, anchorPoint} = this.getGeom();
 
     let viewWidth = 0;
     if (viewLargerThanDisplayArea.width && forcedContentSize !== null && forcedContentSize!.width)
@@ -848,9 +839,9 @@ class BasePopover extends Component<BasePopoverProps, BasePopoverState> {
     const shiftVertical = anchorPoint.y - popoverCenter.y;
 
     this.debug("getTranslateOrigin - popoverOrigin", popoverOrigin);
-    this.debug("getTranslateOrigin - popoverSize", { width: viewWidth, height: viewHeight });
+    this.debug("getTranslateOrigin - popoverSize", {width: viewWidth, height: viewHeight});
     this.debug("getTranslateOrigin - anchorPoint", anchorPoint);
-    this.debug("getTranslateOrigin - shift", { hoizontal: shiftHorizontal, vertical: shiftVertical });
+    this.debug("getTranslateOrigin - shift", {hoizontal: shiftHorizontal, vertical: shiftVertical});
 
     return new Point(popoverOrigin.x + shiftHorizontal, popoverOrigin.y + shiftVertical);
   }
@@ -880,7 +871,7 @@ class BasePopover extends Component<BasePopoverProps, BasePopoverState> {
 
       // Should grow from anchor point
       const translateStart = this.getTranslateOrigin()
-      translateStart.y += (FIX_SHIFT * 2) // Temp fix for useNativeDriver issue
+      translateStart.y += (FIX_SHIFT*2) // Temp fix for useNativeDriver issue
       values.translate.setValue(translateStart);
       const translatePoint = new Point(nextGeom.popoverOrigin.x, nextGeom.popoverOrigin.y);
       values.translateArrow.setValue(this.getArrowTranslateLocation(translatePoint, nextGeom));
@@ -912,20 +903,20 @@ class BasePopover extends Component<BasePopoverProps, BasePopoverState> {
 
   animateTo(
     args:
-      {
-        fade: number;
-        scale: number;
-        translatePoint: Point;
-        callback?: () => void;
-        easing: EasingFunction;
-        values: {
-          scale: Animated.Value,
-          translate: Animated.ValueXY,
-          fade: Animated.Value,
-          translateArrow: Animated.ValueXY
-        },
-        geom: Geometry
-      }
+    {
+      fade: number;
+      scale: number;
+      translatePoint: Point;
+      callback?: () => void;
+      easing: EasingFunction;
+      values: {
+        scale: Animated.Value,
+        translate: Animated.ValueXY,
+        fade: Animated.Value,
+        translateArrow: Animated.ValueXY
+      },
+      geom: Geometry
+    }
   ) {
     const { fade, translatePoint, scale, callback, easing, values, geom } = args;
     const commonConfig = {
@@ -942,7 +933,7 @@ class BasePopover extends Component<BasePopoverProps, BasePopoverState> {
 
     const newArrowLocation = this.getArrowTranslateLocation(translatePoint, geom);
 
-    translatePoint.y = translatePoint.y + (FIX_SHIFT * 2) // Temp fix for useNativeDriver issue
+    translatePoint.y = translatePoint.y + (FIX_SHIFT*2) // Temp fix for useNativeDriver issue
 
     if (!fade && fade !== 0) { console.log("Popover: Fade value is null"); return; }
     if (!translatePoint) { console.log("Popover: Translate Point value is null"); return; }
@@ -976,7 +967,7 @@ class BasePopover extends Component<BasePopoverProps, BasePopoverState> {
     const geom = this.getGeom();
 
     const { animatedValues, nextGeom }: Partial<BasePopoverState> = this.state;
-    const { popoverStyle, extraView } = this.props;
+    const { popoverStyle } = this.props;
     const { width: arrowWidth, height: arrowHeight } = this.getCalculatedArrowDims();
 
     const arrowScale = animatedValues.scale.interpolate({
@@ -992,9 +983,9 @@ class BasePopover extends Component<BasePopoverProps, BasePopoverState> {
       width: arrowWidth,
       height: arrowHeight,
       transform: [
-        { translateX: animatedValues.translateArrow.x },
-        { translateY: animatedValues.translateArrow.y },
-        { scale: arrowScale },
+        {translateX: animatedValues.translateArrow.x},
+        {translateY: animatedValues.translateArrow.y},
+        {scale: arrowScale},
       ]
     };
 
@@ -1012,7 +1003,7 @@ class BasePopover extends Component<BasePopoverProps, BasePopoverState> {
     const backgroundStyle = {
       ...styles.background,
       transform: [
-        { translateY: backgroundShift }
+        {translateY: backgroundShift}
       ],
       ...StyleSheet.flatten(this.props.backgroundStyle)
     };
@@ -1028,10 +1019,10 @@ class BasePopover extends Component<BasePopoverProps, BasePopoverState> {
       ...styles.popoverContent,
       ...StyleSheet.flatten(popoverStyle),
       transform: [
-        { translateX: animatedValues.translate.x },
-        { translateY: animatedValues.translate.y },
-        { scale: animatedValues.scale },
-        { perspective: 1000 }
+        {translateX: animatedValues.translate.x},
+        {translateY: animatedValues.translate.y},
+        {scale: animatedValues.scale},
+        {perspective: 1000}
       ]
     };
 
@@ -1042,8 +1033,8 @@ class BasePopover extends Component<BasePopoverProps, BasePopoverState> {
     }
 
     return (
-      <View pointerEvents="box-none" style={[styles.container, { left: 0 }]}>
-        <SafeAreaView pointerEvents="none" forceInset={this.props.safeAreaInsets} style={{ position: 'absolute', top: FIX_SHIFT, left: 0, right: 0, bottom: 0 }}>
+      <View pointerEvents="box-none" style={[styles.container, {left: 0}]}>
+        <SafeAreaView pointerEvents="none" forceInset={this.props.safeAreaInsets} style={{position: 'absolute', top: FIX_SHIFT, left: 0, right: 0, bottom: 0}}>
           {this.props.safeAreaViewContents}
         </SafeAreaView>
 
@@ -1054,8 +1045,8 @@ class BasePopover extends Component<BasePopoverProps, BasePopoverState> {
             </TouchableWithoutFeedback>
           )}
 
-          <View pointerEvents="box-none" style={{ top: 0, left: 0 }}>
-
+          <View pointerEvents="box-none" style={{top: 0, left: 0}}>
+            
             <Animated.View style={popoverViewStyle} ref={this.popoverRef} onLayout={(evt: LayoutChangeEvent) => {
               const layout = { ...evt.nativeEvent.layout };
               setTimeout(() => this._isMounted && this.measureContent(layout), 10);
@@ -1070,7 +1061,6 @@ class BasePopover extends Component<BasePopoverProps, BasePopoverState> {
             }
           </View>
         </Animated.View>
-        {extraView}
       </View>
     );
   }
@@ -1112,7 +1102,7 @@ const styles = StyleSheet.create({
   },
   dropShadow: {
     shadowColor: 'black',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowRadius: 2,
     shadowOpacity: 0.8
   },

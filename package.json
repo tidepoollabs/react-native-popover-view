@@ -19,7 +19,7 @@
     "watch": "tsc --watch",
     "build": "tsc",
     "tsc": "tsc",
-    "start": "node_modules/react-native/packager/packager.sh",
+    "start": "./node_modules/react-native/packager/packager.sh",
     "test": "jest",
     "prepare": "patch-package",
     "prepublishOnly": "tsc"
