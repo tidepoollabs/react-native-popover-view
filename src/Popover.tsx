@@ -10,7 +10,6 @@ import {
   TouchableWithoutFeedback,
   View,
   Modal,
-  Keyboard,
   Easing,
   StyleProp,
   ViewStyle,
@@ -352,16 +351,12 @@ class AdaptivePopover extends Component<AdaptivePopoverProps, AdaptivePopoverSta
       this.calculateRectFromRef();
     }
     this._isMounted = true;
-
-    this.keyboardDidHide = this.keyboardDidHide.bind(this);
-    this.keyboardDidShow = this.keyboardDidShow.bind(this);
   }
 
   componentWillUnmount() {
     this._isMounted = false;
     Dimensions.removeEventListener('change', this.handleResizeEvent)
-    Keyboard.removeListener('keyboardDidShow', this.keyboardDidShow);
-    Keyboard.removeListener('keyboardDidHide', this.keyboardDidHide);
+
   }
 
   componentDidUpdate(prevProps: AdaptivePopoverProps) {
@@ -431,7 +426,6 @@ class AdaptivePopover extends Component<AdaptivePopoverProps, AdaptivePopoverSta
 
   keyboardDidShow(e: any) {
     this.debug("keyboardDidShow - keyboard height: " + e.endCoordinates.height);
-    this.shiftForKeyboard(e.endCoordinates.height);
   }
 
   keyboardDidHide() {
@@ -498,15 +492,11 @@ class AdaptivePopover extends Component<AdaptivePopoverProps, AdaptivePopoverSta
         onOpenStart={() => {
           onOpenStart && onOpenStart();
           this.debug("Setting up keyboard listeners");
-          Keyboard.addListener('keyboardDidShow', this.keyboardDidShow);
-          Keyboard.addListener('keyboardDidHide', this.keyboardDidHide);
           this.displayAreaStore = this.getDisplayArea();
         }}
         onCloseStart={() => {
           onCloseStart && onCloseStart();
           this.debug("Tearing down keyboard listeners");
-          Keyboard.removeListener('keyboardDidShow', this.keyboardDidShow);
-          Keyboard.removeListener('keyboardDidHide', this.keyboardDidHide);
           if (this._isMounted) this.setState({ shiftedDisplayArea: null });
         }}
         skipMeasureContent={() => this.waitForResizeToFinish}

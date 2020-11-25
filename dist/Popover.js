@@ -73,7 +73,7 @@ var __rest = (this && this.__rest) || function (s, e) {
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import SafeAreaView from 'react-native-safe-area-view';
-import { Platform, Dimensions, Animated, TouchableWithoutFeedback, View, Modal, Keyboard, Easing, StyleSheet, I18nManager } from 'react-native';
+import { Platform, Dimensions, Animated, TouchableWithoutFeedback, View, Modal, Easing, StyleSheet, I18nManager } from 'react-native';
 import { Rect, Point, getRectForRef, getArrowSize, getBorderRadius } from './Utility';
 import { MULTIPLE_POPOVER_WARNING, Placement, Mode, DEFAULT_BORDER_RADIUS, FIX_SHIFT as ORIGINAL_FIX_SHIFT } from './Constants';
 import { computeGeometry, Geometry } from './Geometry';
@@ -316,14 +316,10 @@ var AdaptivePopover = /** @class */ (function (_super) {
             this.calculateRectFromRef();
         }
         this._isMounted = true;
-        this.keyboardDidHide = this.keyboardDidHide.bind(this);
-        this.keyboardDidShow = this.keyboardDidShow.bind(this);
     };
     AdaptivePopover.prototype.componentWillUnmount = function () {
         this._isMounted = false;
         Dimensions.removeEventListener('change', this.handleResizeEvent);
-        Keyboard.removeListener('keyboardDidShow', this.keyboardDidShow);
-        Keyboard.removeListener('keyboardDidHide', this.keyboardDidHide);
     };
     AdaptivePopover.prototype.componentDidUpdate = function (prevProps) {
         var _this = this;
@@ -391,7 +387,6 @@ var AdaptivePopover = /** @class */ (function (_super) {
     };
     AdaptivePopover.prototype.keyboardDidShow = function (e) {
         this.debug("keyboardDidShow - keyboard height: " + e.endCoordinates.height);
-        this.shiftForKeyboard(e.endCoordinates.height);
     };
     AdaptivePopover.prototype.keyboardDidHide = function () {
         this.debug("keyboardDidHide");
@@ -466,14 +461,10 @@ var AdaptivePopover = /** @class */ (function (_super) {
         return (React.createElement(BasePopover, __assign({}, otherProps, { displayArea: this.getDisplayArea(), fromRect: fromRect, onOpenStart: function () {
                 onOpenStart && onOpenStart();
                 _this.debug("Setting up keyboard listeners");
-                Keyboard.addListener('keyboardDidShow', _this.keyboardDidShow);
-                Keyboard.addListener('keyboardDidHide', _this.keyboardDidHide);
                 _this.displayAreaStore = _this.getDisplayArea();
             }, onCloseStart: function () {
                 onCloseStart && onCloseStart();
                 _this.debug("Tearing down keyboard listeners");
-                Keyboard.removeListener('keyboardDidShow', _this.keyboardDidShow);
-                Keyboard.removeListener('keyboardDidHide', _this.keyboardDidHide);
                 if (_this._isMounted)
                     _this.setState({ shiftedDisplayArea: null });
             }, skipMeasureContent: function () { return _this.waitForResizeToFinish; }, extraView: extraView, safeAreaViewContents: (React.createElement(TouchableWithoutFeedback, { style: { flex: 1 }, onLayout: function (evt) { return _this.setDefaultDisplayArea(new Rect(evt.nativeEvent.layout.x + 10, evt.nativeEvent.layout.y + 10, evt.nativeEvent.layout.width - 20, evt.nativeEvent.layout.height - 20)); } },
